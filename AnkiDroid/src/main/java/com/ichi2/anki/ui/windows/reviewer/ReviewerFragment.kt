@@ -53,6 +53,10 @@ import com.ichi2.anki.CollectionManager
 import com.ichi2.anki.DispatchKeyEventListener
 import com.ichi2.anki.Flag
 import com.ichi2.anki.R
+import com.ichi2.anki.aimode.AiModeController
+import com.ichi2.anki.aimode.AiModeDebugLogger
+import com.ichi2.anki.aimode.AiModePreferences
+import com.ichi2.anki.aimode.AiModeState
 import com.ichi2.anki.cardviewer.Gesture
 import com.ichi2.anki.common.utils.android.isRobolectric
 import com.ichi2.anki.databinding.Reviewer2Binding
@@ -65,6 +69,7 @@ import com.ichi2.anki.previewer.CardViewerActivity
 import com.ichi2.anki.previewer.CardViewerFragment
 import com.ichi2.anki.previewer.setFrameStyle
 import com.ichi2.anki.previewer.stdHtml
+import com.ichi2.anki.requireAnkiActivity
 import com.ichi2.anki.reviewer.BindingMap
 import com.ichi2.anki.reviewer.ReviewerBinding
 import com.ichi2.anki.scheduling.SetDueDateDialog
@@ -114,6 +119,9 @@ class ReviewerFragment :
     private val isBigScreen: Boolean get() = resources.configuration.smallestScreenWidthDp >= 720
     private var webviewHasFocus = false
 
+    // AI Mode
+    private var aiModeController: AiModeController? = null
+
     override val baseSnackbarBuilder: SnackbarBuilder = {
         anchorView =
             when {
@@ -145,8 +153,125 @@ class ReviewerFragment :
         if (!requireActivity().isChangingConfigurations) {
             viewModel.stopAutoAdvance()
             shakeDetector?.stop()
+            // Stop AI Mode completely when leaving the reviewer
+            aiModeController?.cleanup()
+        }
+        // Always clear wake lock when fragment stops
+        if (!Prefs.keepScreenOn) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-enable wake lock if AI Mode is active
+        if (aiModeController?.isEnabled() == true) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            AiModeDebugLogger.i("ReviewerFragment", "Screen wake lock re-enabled on resume")
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        aiModeController?.cleanup()
+        aiModeController = null
+    }
+
+    /**
+     * Setup AI Voice Mode
+     */
+    private fun setupAiMode() {
+        AiModeDebugLogger.i("ReviewerFragment", "Setting up AI Mode")
+
+        aiModeController =
+            AiModeController(
+                context = requireContext(),
+                lifecycleOwner = this,
+                listener =
+                    object : AiModeController.AiModeListener {
+                        override fun onStateChanged(state: AiModeState) {
+                            AiModeDebugLogger.d("ReviewerFragment", "AI Mode state: ${state.javaClass.simpleName}")
+                            // Update UI based on state if needed
+                        }
+
+                        override fun onRequestAnswerCard(rating: Rating) {
+                            AiModeDebugLogger.i("ReviewerFragment", "AI Mode requesting answer: $rating")
+                            viewModel.answerCard(rating)
+                        }
+
+                        override fun onShowAnswer() {
+                            AiModeDebugLogger.d("ReviewerFragment", "AI Mode showing answer")
+                            if (!viewModel.showingAnswer.value) {
+                                viewModel.onShowAnswer()
+                            }
+                        }
+
+                        override fun onError(message: String) {
+                            AiModeDebugLogger.e("ReviewerFragment", "AI Mode error: $message")
+                            showSnackbar(message)
+                        }
+
+                        override fun onDebugLog(message: String) {
+                            // Already logged by AiModeDebugLogger
+                        }
+                    },
+            )
+
+        // Listen for card changes using onCardUpdatedFlow
+        viewModel.onCardUpdatedFlow.collectIn(lifecycleScope) {
+            lifecycleScope.launch {
+                val card = viewModel.currentCard.await()
+                AiModeDebugLogger.i("ReviewerFragment", "Card updated flow triggered - Card ID: ${card.id}")
+                val col = requireAnkiActivity().getColUnsafe
+                val question = card.question(col)
+                val answer = card.answer(col)
+                AiModeDebugLogger.i("ReviewerFragment", "Card data - ID: ${card.id}, Question: ${question.take(50)}")
+                aiModeController?.onCardChanged(card, question, answer)
+            }
+        }
+
+        // Also listen for showingAnswer to trigger AI Mode when answer is shown
+        viewModel.showingAnswer.collectIn(lifecycleScope) { showingAnswer ->
+            AiModeDebugLogger.d("ReviewerFragment", "Showing answer changed: $showingAnswer")
+        }
+
+        // Auto-enable if it was enabled before
+        val wasEnabled = AiModePreferences.isAiModeEnabled(requireContext())
+        AiModeDebugLogger.i("ReviewerFragment", "Auto-enabling AI Mode: $wasEnabled")
+        if (wasEnabled) {
+            aiModeController?.setEnabled(true)
+        }
+    }
+
+    /**
+     * Toggle AI Mode on/off
+     * Also manages screen wake lock to keep screen on during voice review
+     */
+    fun toggleAiMode(): Boolean {
+        val controller = aiModeController ?: return false
+        val newState = !controller.isEnabled()
+        controller.setEnabled(newState)
+
+        // Manage screen wake lock based on AI Mode state
+        if (newState) {
+            // Keep screen on when AI Mode is active
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            AiModeDebugLogger.i("ReviewerFragment", "Screen wake lock enabled for AI Mode")
+        } else {
+            // Remove wake lock when AI Mode is disabled (unless global setting is on)
+            if (!Prefs.keepScreenOn) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                AiModeDebugLogger.i("ReviewerFragment", "Screen wake lock disabled")
+            }
+        }
+
+        return newState
+    }
+
+    /**
+     * Check if AI Mode is enabled
+     */
+    fun isAiModeEnabled(): Boolean = aiModeController?.isEnabled() ?: false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,6 +301,7 @@ class ReviewerFragment :
         setupActions()
         setupWhiteboard()
         setupTimebox()
+        setupAiMode()
 
         viewModel.finishResultFlow.collectIn(lifecycleScope) { result ->
             requireActivity().run {

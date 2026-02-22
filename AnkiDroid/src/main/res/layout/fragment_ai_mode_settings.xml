@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Enable AI Mode -->
+        <Switch
+            android:id="@+id/switch_enable_ai_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enable AI Voice Mode"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="API Configuration"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Deepgram API Key -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Deepgram API Key"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_deepgram_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- OpenAI API Key -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="OpenAI API Key"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_openai_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Language Settings"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Source Language -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Question Language"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinner_source_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Target Language -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Answer Language"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinner_target_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Voice Settings"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- TTS Voice -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TTS Voice"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinner_tts_voice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Test TTS Button -->
+        <Button
+            android:id="@+id/button_test_tts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test TTS"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Test STT Button -->
+        <Button
+            android:id="@+id/button_test_stt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test STT (Speech Recognition)"
+            android:layout_marginBottom="8dp" />
+
+        <!-- STT Result Text -->
+        <TextView
+            android:id="@+id/text_stt_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="STT result will appear here"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:padding="8dp"
+            android:background="@android:color/darker_gray"
+            android:backgroundTint="@android:color/background_light"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cache and Debug"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Cache Size -->
+        <TextView
+            android:id="@+id/text_cache_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cache size: 0 MB"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Clear Cache Button -->
+        <Button
+            android:id="@+id/button_clear_cache"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear TTS Cache"
+            android:layout_marginBottom="12dp" />
+
+        <!-- View Logs Button -->
+        <Button
+            android:id="@+id/button_view_logs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Debug Logs"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AI Voice Mode uses Deepgram for speech recognition and OpenAI for text-to-speech and answer validation. Your API keys are stored locally on your device."
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+
+</ScrollView>

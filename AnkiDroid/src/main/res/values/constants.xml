@@ -309,6 +309,11 @@
         <item>@string/button_size</item>
     </string-array>
 
+    <string-array name="ai_mode_summary_entries">
+        <item>@string/pref_api_keys</item>
+        <item>@string/pref_languages</item>
+    </string-array>
+
     <string-array name="controls_summary_entries">
         <item>@string/pref_cat_gestures</item>
         <item>@string/keyboard</item>

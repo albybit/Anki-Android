@@ -114,6 +114,15 @@
         app:summaryEntries="@array/accessibility_summary_entries">
     </com.ichi2.preferences.HeaderPreference>
 
+    <!-- AI Voice Mode -->
+    <com.ichi2.preferences.HeaderPreference
+        android:fragment="com.ichi2.anki.aimode.ui.AiModeSettingsFragment"
+        android:key="@string/pref_ai_mode_screen_key"
+        android:title="@string/pref_cat_ai_mode"
+        android:icon="@drawable/ic_popup_menu_item_record"
+        app:summaryEntries="@array/ai_mode_summary_entries">
+    </com.ichi2.preferences.HeaderPreference>
+
     <!-- Backup Limits Preferences -->
     <com.ichi2.preferences.HeaderPreference
         android:fragment="com.ichi2.anki.preferences.BackupLimitsSettingsFragment"

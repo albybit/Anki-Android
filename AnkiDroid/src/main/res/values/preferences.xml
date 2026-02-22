@@ -216,6 +216,8 @@
     <!-- Notifications -->
     <string name="notifications_permission_requested_key">notificationsPermissionRequested</string>
     <string name="record_audio_permission_requested_key">recordAudioPermissionRequested</string>
+    <!-- AI Voice Mode -->
+    <string name="pref_ai_mode_screen_key">aiModeScreen</string>
     <!-- Developer options -->
     <string name="pref_developer_options_screen_key">devOptionsKey</string>
     <string name="pref_trigger_crash_key">trigger_crash_preference</string>

@@ -505,4 +505,5 @@ dependencies {
     implementation libs.androidx.media3.exoplayer
     implementation libs.androidx.media3.exoplayer.dash
     implementation libs.androidx.media3.ui
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
 }
